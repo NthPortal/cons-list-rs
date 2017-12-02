@@ -1,5 +1,6 @@
-use std::hash::{Hash, Hasher};
+use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter, Result};
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 use BaseList::{Cons, Nil};
 
@@ -153,6 +154,18 @@ impl<A: Hash> Hash for List<A> {
     }
 }
 
+impl<A: PartialOrd> PartialOrd for List<A> {
+    fn partial_cmp(&self, other: &List<A>) -> Option<Ordering> {
+        self.iter().partial_cmp(other.iter())
+    }
+}
+
+impl<A: Ord> Ord for List<A> {
+    fn cmp(&self, other: &List<A>) -> Ordering {
+        self.iter().cmp(other.iter())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -249,5 +262,39 @@ mod tests {
         let mut hasher = DefaultHasher::new();
         assert_eq!(a, e);
         assert_eq!(a.hash(&mut hasher), e.hash(&mut hasher));
+    }
+
+    #[test]
+    fn test_cmp() {
+        let nil = List::nil();
+        let a = List::cons(1, nil.clone());
+        let b = List::cons(2, nil.clone());
+        let c = List::cons(1, List::cons(2, nil.clone()));
+
+        assert_eq!(a.cmp(&List::cons(1, nil.clone())), Ordering::Equal);
+        assert_eq!(nil.cmp(&nil), Ordering::Equal);
+        assert!(a < b);
+        assert!(a < c);
+        assert!(a > nil);
+        assert!(b > a);
+        assert!(b > c);
+        assert!(nil < c);
+    }
+
+    #[test]
+    fn test_partial_cmp() {
+        let nil = List::nil();
+        let a = List::cons(1, nil.clone());
+        let b = List::cons(2, nil.clone());
+        let c = List::cons(1, List::cons(2, nil.clone()));
+
+        assert_eq!(a.partial_cmp(&List::cons(1, nil.clone())), Some(Ordering::Equal));
+        assert_eq!(nil.partial_cmp(&nil), Some(Ordering::Equal));
+        assert_eq!(a.partial_cmp(&b), Some(Ordering::Less));
+        assert_eq!(a.partial_cmp(&c), Some(Ordering::Less));
+        assert_eq!(a.partial_cmp(&nil), Some(Ordering::Greater));
+        assert_eq!(b.partial_cmp(&a), Some(Ordering::Greater));
+        assert_eq!(b.partial_cmp(&c), Some(Ordering::Greater));
+        assert_eq!(nil.partial_cmp(&c), Some(Ordering::Less));
     }
 }
