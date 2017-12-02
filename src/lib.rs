@@ -1,5 +1,5 @@
 use std::hash::{Hash, Hasher};
-use std::fmt::{Debug, Formatter, Result};
+use std::fmt::{Debug, Display, Formatter, Result};
 use std::rc::Rc;
 use BaseList::{Cons, Nil};
 
@@ -99,6 +99,18 @@ impl<'a, A: 'a> IntoIterator for &'a List<A> {
     }
 }
 
+impl<A: Display> Display for List<A> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        let mut list = self;
+
+        while let Cons(ref h, ref t) = *list.rc {
+            write!(f, "{} :: ", *h)?;
+            list = t;
+        }
+        write!(f, "Nil")
+    }
+}
+
 impl<A: Debug> Debug for List<A> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let mut list = self;
@@ -184,6 +196,15 @@ mod tests {
         assert_eq!(*list.head_opt().unwrap(), 0);
         let list = list.tail_opt().unwrap();
         assert!(list.is_empty());
+    }
+
+    #[test]
+    fn test_fmt() {
+        assert_eq!(format!("{}", List::cons(3, List::cons(2, List::cons(1, List::nil())))),
+                   "3 :: 2 :: 1 :: Nil");
+
+        assert_eq!(format!("{:?}", List::cons(3, List::cons(2, List::cons(1, List::nil())))),
+                   "3 :: 2 :: 1 :: Nil");
     }
 
     #[test]
