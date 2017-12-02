@@ -125,15 +125,23 @@ impl<A: Debug> Debug for List<A> {
 
 impl<A: PartialEq> PartialEq for List<A> {
     fn eq(&self, other: &List<A>) -> bool {
-        if let Cons(ref h1, ref t1) = *self.rc {
-            if let Cons(ref h2, ref t2) = *other.rc {
-                h1 == h2 && t1 == t2
+        let mut list1 = self;
+        let mut list2 = other;
+
+        while let Cons(ref h1, ref t1) = *list1.rc {
+            if let Cons(ref h2, ref t2) = *list2.rc {
+                if h1 == h2 {
+                    list1 = t1;
+                    list2 = t2;
+                } else {
+                    return false;
+                }
             } else {
-                false
+                return false;
             }
-        } else {
-            other.is_empty()
         }
+
+        list2.is_empty()
     }
 }
 
