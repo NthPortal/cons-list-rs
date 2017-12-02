@@ -1,3 +1,5 @@
+use std::hash::{Hash, Hasher};
+use std::fmt::{Debug, Formatter, Result};
 use std::rc::Rc;
 use BaseList::{Cons, Nil};
 
@@ -97,8 +99,44 @@ impl<'a, A: 'a> IntoIterator for &'a List<A> {
     }
 }
 
+impl<A: Debug> Debug for List<A> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        let mut list = self;
+
+        while let Cons(ref h, ref t) = *list.rc {
+            write!(f, "{:?} :: ", *h)?;
+            list = t;
+        }
+        write!(f, "Nil")
+    }
+}
+
+impl<A: PartialEq> PartialEq for List<A> {
+    fn eq(&self, other: &List<A>) -> bool {
+        if let Cons(ref h1, ref t1) = *self.rc {
+            if let Cons(ref h2, ref t2) = *other.rc {
+                h1 == h2 && t1 == t2
+            } else {
+                false
+            }
+        } else {
+            other.is_empty()
+        }
+    }
+}
+
+impl<A: Eq> Eq for List<A> {}
+
+impl<A: Hash> Hash for List<A> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.iter().for_each(|elem| elem.hash(state));
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use std::collections::hash_map::DefaultHasher;
     use List;
 
     #[test]
@@ -146,5 +184,41 @@ mod tests {
         assert_eq!(*list.head_opt().unwrap(), 0);
         let list = list.tail_opt().unwrap();
         assert!(list.is_empty());
+    }
+
+    #[test]
+    fn test_eq() {
+        let nil = List::nil();
+        let a = List::cons("a", nil.clone());
+        let b = List::cons("b", nil.clone());
+
+        // Test basic properties
+        assert_eq!(a, List::cons("a", nil.clone()));
+        assert_eq!(b, List::cons("b", nil.clone()));
+        assert_ne!(a, b);
+
+        // reflexive
+        assert_eq!(a, a);
+        assert_eq!(b, b);
+        assert_eq!(b, b.clone());
+
+        // symmetric
+        assert_eq!(a, a.clone());
+        assert_eq!(a.clone(), a);
+        assert_eq!(a, List::cons("a", nil.clone()));
+        assert_eq!(List::cons("a", nil.clone()), a);
+
+        // transitive
+        let c = List::cons("b", nil.clone());
+        let d = List::cons("b", nil.clone());
+        assert_eq!(b, c);
+        assert_eq!(c, d);
+        assert_eq!(b, d);
+
+        // hashing
+        let e = List::cons("a", nil.clone());
+        let mut hasher = DefaultHasher::new();
+        assert_eq!(a, e);
+        assert_eq!(a.hash(&mut hasher), e.hash(&mut hasher));
     }
 }
