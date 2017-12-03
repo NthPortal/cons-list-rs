@@ -71,6 +71,18 @@ impl<A> List<A> {
     pub fn iter(&self) -> Iter<A> {
         Iter { list: self }
     }
+
+    pub fn rev(&self) -> List<A> where A: Clone {
+        let mut list = nil();
+        let mut rest = self;
+
+        while let Cons(ref h, ref t) = *rest.rc {
+            list = cons(h.clone(), list);
+            rest = t;
+        }
+
+        list
+    }
 }
 
 pub struct Iter<'a, A: 'a> {
@@ -200,6 +212,15 @@ mod tests {
         assert_eq!(*list.head_opt().unwrap(), 0);
         let list = list.tail_opt().unwrap();
         assert!(list.is_empty());
+    }
+
+    #[test]
+    fn test_rev() {
+        let nil = nil();
+        let a = cons(3, cons(2, cons(1, nil.clone())));
+
+        assert_eq!(a.rev(), cons(1, cons(2, cons(3, nil.clone()))));
+        assert_eq!(nil.rev(), nil);
     }
 
     #[test]
