@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::hash::{Hash, Hasher};
+use std::iter::FromIterator;
 use std::rc::Rc;
 use BaseList::{Cons, Nil};
 
@@ -109,6 +110,32 @@ impl<'a, A: 'a> IntoIterator for &'a List<A> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+struct BuildCell<A> {
+    prev: Option<Box<BuildCell<A>>>,
+    elem: A,
+}
+
+impl<A> FromIterator<A> for List<A> {
+    fn from_iter<T: IntoIterator<Item=A>>(iter: T) -> Self {
+        let mut cell: Option<Box<BuildCell<A>>> = None;
+
+        for elem in iter {
+            cell = Some(Box::new(BuildCell { prev: cell, elem }));
+        }
+
+        let mut list = nil();
+
+        while let Some(boxed) = cell {
+            let build_cell = *boxed;
+            let BuildCell { prev, elem } = build_cell;
+            list = cons(elem, list);
+            cell = prev;
+        }
+
+        list
     }
 }
 
@@ -221,6 +248,15 @@ mod tests {
 
         assert_eq!(a.rev(), cons(1, cons(2, cons(3, nil.clone()))));
         assert_eq!(nil.rev(), nil);
+    }
+
+    #[test]
+    fn test_to_from_iterator() {
+        let nil = nil();
+        let a = cons(3, cons(2, cons(1, nil.clone())));
+
+        assert_eq!(a.iter().map(|i| *i).collect::<List<i32>>(), a);
+        assert_eq!(vec![3, 2, 1].into_iter().collect::<List<i32>>(), a);
     }
 
     #[test]
