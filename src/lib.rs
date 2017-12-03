@@ -189,6 +189,12 @@ impl<A: Ord> Ord for List<A> {
     }
 }
 
+impl<A> Default for List<A> {
+    fn default() -> Self {
+        nil()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -336,5 +342,10 @@ mod tests {
         assert_eq!(b.partial_cmp(&a), Some(Ordering::Greater));
         assert_eq!(b.partial_cmp(&c), Some(Ordering::Greater));
         assert_eq!(nil.partial_cmp(&c), Some(Ordering::Less));
+    }
+
+    #[test]
+    fn test_default() {
+        assert_eq!(List::<i32>::default(), nil())
     }
 }
