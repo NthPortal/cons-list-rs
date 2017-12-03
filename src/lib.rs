@@ -20,15 +20,15 @@ impl<A> Clone for List<A> {
     }
 }
 
+pub fn cons<A>(head: A, tail: List<A>) -> List<A> {
+    List { rc: Rc::new(Cons(head, tail)) }
+}
+
+pub fn nil<A>() -> List<A> {
+    List { rc: Rc::new(Nil) }
+}
+
 impl<A> List<A> {
-    pub fn cons(head: A, tail: List<A>) -> List<A> {
-        List { rc: Rc::new(Cons(head, tail)) }
-    }
-
-    pub fn nil() -> List<A> {
-        List { rc: Rc::new(Nil) }
-    }
-
     pub fn head(&self) -> &A {
         match *self.rc {
             Cons(ref h, _) => &h,
@@ -154,11 +154,10 @@ impl<A: Ord> Ord for List<A> {
 mod tests {
     use super::*;
     use std::collections::hash_map::DefaultHasher;
-    use List;
 
     #[test]
     fn test_nil() {
-        let nil = List::<i32>::nil();
+        let nil = nil::<i32>();
         assert!(nil.is_empty());
         assert_eq!(nil.len(), 0);
         assert!(nil.head_opt().is_none());
@@ -168,20 +167,20 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_nil_panic_head() {
-        List::<i32>::nil().head();
+        nil::<i32>().head();
     }
 
     #[test]
     #[should_panic]
     fn test_nil_panic_tail() {
-        List::<i32>::nil().tail();
+        nil::<i32>().tail();
     }
 
     #[test]
     fn test_cons() {
-        let nil = List::nil();
-        let a = List::cons(3, List::cons(2, List::cons(1, nil.clone())));
-        let b = List::cons(4, a.clone());
+        let nil = nil();
+        let a = cons(3, cons(2, cons(1, nil.clone())));
+        let b = cons(4, a.clone());
 
         assert_eq!(a.len(), 3);
         assert_eq!(b.len(), 4);
@@ -197,7 +196,7 @@ mod tests {
         let list = list.tail();
         assert!(list.is_empty());
 
-        let list = List::cons(0, nil.clone());
+        let list = cons(0, nil.clone());
         assert_eq!(*list.head_opt().unwrap(), 0);
         let list = list.tail_opt().unwrap();
         assert!(list.is_empty());
@@ -205,22 +204,22 @@ mod tests {
 
     #[test]
     fn test_fmt() {
-        assert_eq!(format!("{}", List::cons(3, List::cons(2, List::cons(1, List::nil())))),
+        assert_eq!(format!("{}", cons(3, cons(2, cons(1, nil())))),
                    "3 :: 2 :: 1 :: Nil");
 
-        assert_eq!(format!("{:?}", List::cons(3, List::cons(2, List::cons(1, List::nil())))),
+        assert_eq!(format!("{:?}", cons(3, cons(2, cons(1, nil())))),
                    "3 :: 2 :: 1 :: Nil");
     }
 
     #[test]
     fn test_eq() {
-        let nil = List::nil();
-        let a = List::cons("a", nil.clone());
-        let b = List::cons("b", nil.clone());
+        let nil = nil();
+        let a = cons("a", nil.clone());
+        let b = cons("b", nil.clone());
 
         // Test basic properties
-        assert_eq!(a, List::cons("a", nil.clone()));
-        assert_eq!(b, List::cons("b", nil.clone()));
+        assert_eq!(a, cons("a", nil.clone()));
+        assert_eq!(b, cons("b", nil.clone()));
         assert_ne!(a, b);
 
         // reflexive
@@ -231,18 +230,18 @@ mod tests {
         // symmetric
         assert_eq!(a, a.clone());
         assert_eq!(a.clone(), a);
-        assert_eq!(a, List::cons("a", nil.clone()));
-        assert_eq!(List::cons("a", nil.clone()), a);
+        assert_eq!(a, cons("a", nil.clone()));
+        assert_eq!(cons("a", nil.clone()), a);
 
         // transitive
-        let c = List::cons("b", nil.clone());
-        let d = List::cons("b", nil.clone());
+        let c = cons("b", nil.clone());
+        let d = cons("b", nil.clone());
         assert_eq!(b, c);
         assert_eq!(c, d);
         assert_eq!(b, d);
 
         // hashing
-        let e = List::cons("a", nil.clone());
+        let e = cons("a", nil.clone());
         let mut hasher = DefaultHasher::new();
         assert_eq!(a, e);
         assert_eq!(a.hash(&mut hasher), e.hash(&mut hasher));
@@ -250,12 +249,12 @@ mod tests {
 
     #[test]
     fn test_cmp() {
-        let nil = List::nil();
-        let a = List::cons(1, nil.clone());
-        let b = List::cons(2, nil.clone());
-        let c = List::cons(1, List::cons(2, nil.clone()));
+        let nil = nil();
+        let a = cons(1, nil.clone());
+        let b = cons(2, nil.clone());
+        let c = cons(1, cons(2, nil.clone()));
 
-        assert_eq!(a.cmp(&List::cons(1, nil.clone())), Ordering::Equal);
+        assert_eq!(a.cmp(&cons(1, nil.clone())), Ordering::Equal);
         assert_eq!(nil.cmp(&nil), Ordering::Equal);
         assert!(a < b);
         assert!(a < c);
@@ -267,12 +266,12 @@ mod tests {
 
     #[test]
     fn test_partial_cmp() {
-        let nil = List::nil();
-        let a = List::cons(1, nil.clone());
-        let b = List::cons(2, nil.clone());
-        let c = List::cons(1, List::cons(2, nil.clone()));
+        let nil = nil();
+        let a = cons(1, nil.clone());
+        let b = cons(2, nil.clone());
+        let c = cons(1, cons(2, nil.clone()));
 
-        assert_eq!(a.partial_cmp(&List::cons(1, nil.clone())), Some(Ordering::Equal));
+        assert_eq!(a.partial_cmp(&cons(1, nil.clone())), Some(Ordering::Equal));
         assert_eq!(nil.partial_cmp(&nil), Some(Ordering::Equal));
         assert_eq!(a.partial_cmp(&b), Some(Ordering::Less));
         assert_eq!(a.partial_cmp(&c), Some(Ordering::Less));
