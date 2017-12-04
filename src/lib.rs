@@ -113,26 +113,12 @@ impl<'a, A: 'a> IntoIterator for &'a List<A> {
     }
 }
 
-struct BuildCell<A> {
-    prev: Option<Box<BuildCell<A>>>,
-    elem: A,
-}
-
 impl<A> FromIterator<A> for List<A> {
     fn from_iter<T: IntoIterator<Item=A>>(iter: T) -> Self {
-        let mut cell: Option<Box<BuildCell<A>>> = None;
-
-        for elem in iter {
-            cell = Some(Box::new(BuildCell { prev: cell, elem }));
-        }
-
+        let elems: Vec<A> = iter.into_iter().collect();
         let mut list = nil();
-
-        while let Some(boxed) = cell {
-            let build_cell = *boxed;
-            let BuildCell { prev, elem } = build_cell;
+        for elem in elems.into_iter().rev() {
             list = cons(elem, list);
-            cell = prev;
         }
 
         list
