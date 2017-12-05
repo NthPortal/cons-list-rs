@@ -115,7 +115,7 @@ impl<A> List<A> {
     }
 
     /// Returns a list with the elements in reverse order.
-    pub fn rev(&self) -> List<A> where A: Clone {
+    pub fn reverse(&self) -> List<A> where A: Clone {
         let mut list = nil();
         let mut rest = self;
 
@@ -281,12 +281,12 @@ mod tests {
     }
 
     #[test]
-    fn test_rev() {
+    fn test_reverse() {
         let nil = nil();
         let a = cons(3, cons(2, cons(1, nil.clone())));
 
-        assert_eq!(a.rev(), cons(1, cons(2, cons(3, nil.clone()))));
-        assert_eq!(nil.rev(), nil);
+        assert_eq!(a.reverse(), cons(1, cons(2, cons(3, nil.clone()))));
+        assert_eq!(nil.reverse(), nil);
     }
 
     #[test]
