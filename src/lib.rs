@@ -84,6 +84,14 @@ impl<A> List<A> {
 
         list
     }
+
+    pub fn from_double_ended_iter<I: DoubleEndedIterator<Item=A>>(iter: I) -> List<A> {
+        let mut list = nil();
+        for elem in iter.rev() {
+            list = cons(elem, list);
+        }
+        list
+    }
 }
 
 pub struct Iter<'a, A: 'a> {
@@ -116,12 +124,7 @@ impl<'a, A: 'a> IntoIterator for &'a List<A> {
 impl<A> FromIterator<A> for List<A> {
     fn from_iter<T: IntoIterator<Item=A>>(iter: T) -> Self {
         let elems: Vec<A> = iter.into_iter().collect();
-        let mut list = nil();
-        for elem in elems.into_iter().rev() {
-            list = cons(elem, list);
-        }
-
-        list
+        List::from_double_ended_iter(elems.into_iter())
     }
 }
 
@@ -249,6 +252,7 @@ mod tests {
 
         assert_eq!(a.iter().map(|i| *i).collect::<List<i32>>(), a);
         assert_eq!(vec![3, 2, 1].into_iter().collect::<List<i32>>(), a);
+        assert_eq!(List::from_double_ended_iter(vec![3, 2, 1].into_iter()), a);
     }
 
     #[test]
