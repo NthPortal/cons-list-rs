@@ -25,10 +25,15 @@ use BaseList::{Cons, Nil};
 /// Lists can be cheaply shared using `.clone()`.
 ///
 /// ```rust
-/// use nth_cons_list::{cons, nil};
+/// use std::fmt::Display;
+/// use nth_cons_list::*;
 ///
-/// let list1 = cons(1, cons(2, cons(3, nil())));
-/// let list2 = list1.clone();
+/// fn print_list<A: Display>(list: List<A>) {
+///     println!("{}", list);
+/// }
+///
+/// let list = cons(1, cons(2, cons(3, nil())));
+/// print_list(list.clone());
 /// ```
 pub struct List<A> {
     rc: Rc<BaseList<A>>
