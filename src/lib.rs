@@ -1,3 +1,6 @@
+//! An immutable [cons list](https://en.wikipedia.org/wiki/Cons) designed
+//! to be easily and cheaply sharable through cloning.
+
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::hash::{Hash, Hasher};
@@ -6,6 +9,23 @@ use std::rc::Rc;
 use BaseList::{Cons, Nil};
 
 
+/// An immutable cons list.
+///
+/// # Examples
+///
+/// A list can be created using [`nil`](fn.nil.html) and [`cons`](fn.cons.html).
+///
+/// ```rust
+/// // A list containing `1, 2, 3`
+/// let list = cons(1, cons(2, cons(3, nil())));
+/// ```
+///
+/// Lists can be cheaply shared using `.clone()`.
+///
+/// ```rust
+/// let list1 = cons(1, cons(2, cons(3, nil())));
+/// let list2 = list1.clone();
+/// ```
 pub struct List<A> {
     rc: Rc<BaseList<A>>
 }
@@ -16,20 +36,29 @@ enum BaseList<A> {
 }
 
 impl<A> Clone for List<A> {
+    /// Clones the list by cloning a reference counted pointer to
+    /// the list's contents; this operation is very cheap.
     fn clone(&self) -> Self {
         List { rc: Rc::clone(&self.rc) }
     }
 }
 
+/// Prepends the specified element at the head of the specified list.
 pub fn cons<A>(head: A, tail: List<A>) -> List<A> {
     List { rc: Rc::new(Cons(head, tail)) }
 }
 
+/// Returns the empty list.
 pub fn nil<A>() -> List<A> {
     List { rc: Rc::new(Nil) }
 }
 
 impl<A> List<A> {
+    /// Returns the first element of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the list is empty.
     pub fn head(&self) -> &A {
         match *self.rc {
             Cons(ref h, _) => &h,
@@ -37,6 +66,11 @@ impl<A> List<A> {
         }
     }
 
+    /// Returns a list containing all elements except the first.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the list is empty.
     pub fn tail(&self) -> List<A> {
         match *self.rc {
             Cons(_, ref t) => t.clone(),
@@ -44,6 +78,8 @@ impl<A> List<A> {
         }
     }
 
+    /// Returns the first element of the list, or `None` if
+    /// this list is empty.
     pub fn head_opt(&self) -> Option<&A> {
         match *self.rc {
             Cons(ref h, _) => Some(&h),
@@ -51,6 +87,8 @@ impl<A> List<A> {
         }
     }
 
+    /// Returns a list containing all elements except the first,
+    /// or `None` if this list is empty.
     pub fn tail_opt(&self) -> Option<List<A>> {
         match *self.rc {
             Cons(_, ref t) => Some(t.clone()),
@@ -58,6 +96,7 @@ impl<A> List<A> {
         }
     }
 
+    /// Tests whether this list is empty.
     pub fn is_empty(&self) -> bool {
         match *self.rc {
             Cons(_, _) => false,
@@ -65,14 +104,17 @@ impl<A> List<A> {
         }
     }
 
+    /// Returns the length of this list.
     pub fn len(&self) -> usize {
         self.iter().count()
     }
 
+    /// Returns an iterator over the elements of this list.
     pub fn iter(&self) -> Iter<A> {
         Iter { list: self }
     }
 
+    /// Returns a list with the elements in reverse order.
     pub fn rev(&self) -> List<A> where A: Clone {
         let mut list = nil();
         let mut rest = self;
@@ -85,6 +127,7 @@ impl<A> List<A> {
         list
     }
 
+    /// Creates a new list from a `DoubleEndedIterator`.
     pub fn from_double_ended_iter<I: DoubleEndedIterator<Item=A>>(iter: I) -> List<A> {
         let mut list = nil();
         for elem in iter.rev() {
@@ -94,6 +137,7 @@ impl<A> List<A> {
     }
 }
 
+/// An iterator over a [list](struct.List.html).
 pub struct Iter<'a, A: 'a> {
     list: &'a List<A>
 }
