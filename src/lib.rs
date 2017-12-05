@@ -16,6 +16,8 @@ use BaseList::{Cons, Nil};
 /// A list can be created using [`nil`](fn.nil.html) and [`cons`](fn.cons.html).
 ///
 /// ```rust
+/// use nth_cons_list::{cons, nil};
+///
 /// // A list containing `1, 2, 3`
 /// let list = cons(1, cons(2, cons(3, nil())));
 /// ```
@@ -23,6 +25,8 @@ use BaseList::{Cons, Nil};
 /// Lists can be cheaply shared using `.clone()`.
 ///
 /// ```rust
+/// use nth_cons_list::{cons, nil};
+///
 /// let list1 = cons(1, cons(2, cons(3, nil())));
 /// let list2 = list1.clone();
 /// ```
