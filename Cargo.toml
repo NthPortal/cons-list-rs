@@ -2,5 +2,5 @@
 name = "nth-cons-list"
 version = "0.1.0"
 authors = ["NthPortal <nthportal@gmail.com>"]
-
-[dependencies]
+description = "The nth cons list implementation."
+license = "Apache-2.0"
