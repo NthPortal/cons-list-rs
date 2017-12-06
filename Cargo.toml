@@ -1,0 +1,6 @@
+[package]
+name = "nth-cons-list"
+version = "0.1.0"
+authors = ["NthPortal <nthportal@gmail.com>"]
+
+[dependencies]
