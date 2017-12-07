@@ -8,6 +8,7 @@ license = "Apache-2.0"
 
 homepage = "https://github.com/NthPortal/cons-list-rs"
 repository = "https://github.com/NthPortal/cons-list-rs"
+documentation = "https://nthportal.github.io/docs/rust/cons-list-rs/"
 
 keywords = ["list", "cons", "cons list", "collections", "functional"]
 categories = ["data-structures"]
