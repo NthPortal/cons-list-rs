@@ -1,0 +1,18 @@
+[package]
+name = "nth-cons-list"
+description = "The nth cons list implementation."
+version = "0.1.0"
+
+authors = ["NthPortal <nthportal@gmail.com>"]
+license = "Apache-2.0"
+
+homepage = "https://github.com/NthPortal/cons-list-rs"
+repository = "https://github.com/NthPortal/cons-list-rs"
+documentation = "https://nthportal.github.io/docs/rust/cons-list-rs/"
+
+keywords = ["list", "cons", "cons_list", "collections", "functional"]
+categories = ["data-structures"]
+
+
+[badges]
+travis-ci = { repository = "NthPortal/cons-list-rs", branch = "master" }
